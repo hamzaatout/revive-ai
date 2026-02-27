@@ -74,8 +74,8 @@ jupyter notebook notebooks/
 
 ## Team Members
 
-| Name | Role |
+| Name | Major |
 |---|---|
-| **Hamza Atout** | Project Lead & ML Engineer |
-| **Farah Abdallah** | Data Engineer & Model Training |
-| **Nour Hamieh** | Computer Vision & Evaluation |
+| **Hamza Atout** | CSE E4 |
+| **Farah Abdallah** | CCE E4 |
+| **Nour Hamieh** | CCE E3 |
