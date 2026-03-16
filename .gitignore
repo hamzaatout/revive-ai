@@ -1,45 +1,41 @@
-# Virtual environments
-venv/
-env/
-.env/
-.venv/
-
-# Python cache
+# Python Artifacts
 __pycache__/
 *.py[cod]
 *$py.class
-*.pyo
+*.so
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints/
-**/.ipynb_checkpoints/
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Large dataset folders
-data/raw/
-data/processed/
-
-# Saved model weights
-*.pth
+# Deep Learning Weights & Checkpoints
 *.h5
-*.pt
+*.hdf5
+*.pb
 *.ckpt
+*.pt
+*.pth
+*.weights
+saved_model/
+checkpoints/
+services/*/weights/*
 
-# Distribution / packaging
-dist/
-build/
-*.egg-info/
+# Datasets & Images
+data/
+datasets/
+*.jpg
+*.jpeg
+*.png
+*.tfrecord
+scripts/data_preprocessing/raw/
+scripts/data_preprocessing/processed/
 
-# IDE / editor files
-.vscode/
+# IDEs
 .idea/
+.vscode/
 *.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs and outputs
-*.log
-runs/
-outputs/

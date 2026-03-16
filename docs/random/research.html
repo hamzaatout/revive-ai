@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Restoration & Colorization | AUB Neural Networks</title>
+    <style>
+        :root {
+            --bg-base: #121212;
+            --bg-surface: #1e1e1e;
+            --bg-card: #282828;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-gold: #c5a059;
+            --accent-gold-hover: #e3be77;
+            --border-color: #383838;
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-serif: "Merriweather", "Playfair Display", Georgia, serif;
+            --font-mono: "Courier New", Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-serif);
+            font-weight: 400;
+        }
+
+        a {
+            color: var(--accent-gold);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--accent-gold-hover);
+            text-decoration: underline;
+        }
+
+        /* Layout & Container */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header / Hero */
+        header {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-base) 100%);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        header p.subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Team Section */
+        .team-section {
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .team-member {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease;
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+        }
+
+        .team-member h3 {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 5px;
+            font-family: var(--font-sans);
+            font-weight: 600;
+        }
+
+        .team-member p {
+            font-size: 0.95rem;
+            color: var(--accent-gold);
+        }
+
+        /* Abstract */
+        .abstract-section {
+            padding: 60px 0;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .abstract-section h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .abstract-section p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        /* Research Sections */
+        .research-section {
+            padding: 40px 0 80px;
+        }
+
+        .section-title {
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 40px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--accent-gold);
+            display: inline-block;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-full {
+            grid-column: 1 / -1;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card h3::before {
+            content: "✦";
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .card h4 {
+            font-family: var(--font-sans);
+            font-weight: 600;
+            color: #fff;
+            margin: 20px 0 10px;
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        .card ul {
+            list-style-type: none;
+            margin-bottom: 20px;
+        }
+
+        .card li {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .card li::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: var(--accent-gold);
+        }
+
+        .link-badge {
+            display: inline-block;
+            background-color: rgba(197, 160, 89, 0.1);
+            border: 1px solid var(--accent-gold);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+            margin-top: 5px;
+        }
+
+        .formula {
+            background-color: #000;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            color: #a3e4d7;
+            display: block;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-surface);
+            padding: 40px 20px;
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            header p.subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <header>
+        <div class="container">
+            <h1>AI Restoration & Colorization<br>of Historical Photographs</h1>
+            <p class="subtitle">Neural Networks Project - American University of Beirut (AUB)</p>
+        </div>
+    </header>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="container">
+            <div class="team-grid">
+                <div class="team-member">
+                    <h3>Hamza Atout</h3>
+                    <p><a href="mailto:hsa60@mail.aub.edu">hsa60@mail.aub.edu</a></p>
+                </div>
+                <div class="team-member">
+                    <h3>Nour Hammieh</h3>
+                    <p><a href="mailto:nnh30@mail.aub.edu">nnh30@mail.aub.edu</a></p>
+                </div>
+                <div class="team-member">
+                    <h3>Farah Abdallah</h3>
+                    <p><a href="mailto:fia18@mail.aub.edu">fia18@mail.aub.edu</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Abstract -->
+    <section class="abstract-section">
+        <div class="container">
+            <h2>Project Abstract</h2>
+            <p>
+                The computational restoration and colorization of historical archival photographs requires a specialized dual-pipeline artificial intelligence architecture. The primary pipeline executes structural restoration, involving the semantic inpainting of physical damage, denoising of organic film grain, and deblurring of optical aberrations resulting from archaic lenses. The secondary pipeline executes semantic image colorization, an inherently ill-posed problem that leverages deep semantic priors learned from vast visual datasets to hallucinate a perceptually vibrant and contextually accurate color palette.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container">
+        
+        <!-- Structural Restoration Section -->
+        <section class="research-section">
+            <h2 class="section-title">Phase 1: Structural Restoration</h2>
+            <div class="card-grid">
+                <!-- Architectures -->
+                <div class="card">
+                    <h3>Architectures</h3>
+                    <p>Overcoming the domain gap between mathematically synthesized noise and real physical film damage requires specialized topologies.</p>
+                    
+                    <h4>Bringing Old Photos Back to Life</h4>
+                    <p>Addresses the failure of direct pixel-to-pixel mapping using a triplet domain translation problem. Utilizes dual Variational Autoencoders (VAEs) to project disparate inputs into a shared latent space, closing the domain gap before restorative mapping.</p>
+                    
+                    <h4>SwinIR & Restormer</h4>
+                    <p>Uses Vision Transformers (ViTs) and Residual Swin Transformer Blocks (RSTB) to model long-range global dependencies efficiently. Shifts window partitioning to reduce computational complexity from quadratic to linear.</p>
+
+                    <h4>GFP-GAN</h4>
+                    <p>Resolves "blind face restoration" by exploiting Generative Facial Priors from StyleGAN2. Modulates synthesized features via Channel-Split Spatial Feature Transform (CS-SFT) layers to preserve specific biometrics.</p>
+
+                    <h4>DiffBIR (Latent Diffusion)</h4>
+                    <p>A rigorous two-stage pipeline. Stage 1 strips noise/blur using SwinIR, while Stage 2 employs IRControlNet (Stable Diffusion backbone) to iteratively inject photorealistic, high-frequency textural details back into the image.</p>
+                </div>
+
+                <!-- Datasets -->
+                <div class="card">
+                    <h3>Datasets</h3>
+                    <p>Training robust models requires enormous datasets of pristine high-resolution imagery juxtaposed with highly curated authentic physical damage.</p>
+                    
+                    <h4>Pristine Datasets (Synthetic Degradation)</h4>
+                    <ul>
+                        <li>
+                            <strong>FFHQ (Flickr-Faces-HQ):</strong> 70k diverse high-fidelity facial images at 1024x1024 resolution. Critical for StyleGAN priors.<br>
+                            <a href="https://github.com/NVlabs/ffhq-dataset" target="_blank" class="link-badge">github.com/NVlabs/ffhq-dataset</a>
+                        </li>
+                        <li>
+                            <strong>CelebAMask-HQ:</strong> 30k images with pixel-perfect segmentation masks for 19 distinct facial attributes.<br>
+                            <a href="https://github.com/switchablenorms/CelebAMask-HQ" target="_blank" class="link-badge">github.com/switchablenorms/CelebAMask-HQ</a>
+                        </li>
+                        <li>
+                            <strong>Places2:</strong> Over 10 million images spanning 400 scene categories to prevent background degradation failures.<br>
+                            <a href="http://places2.csail.mit.edu/download.html" target="_blank" class="link-badge">places2.csail.mit.edu</a>
+                        </li>
+                    </ul>
+
+                    <h4>Real & Paired Scratch Datasets</h4>
+                    <ul>
+                        <li>
+                            <strong>ScraOld:</strong> 703 meticulously curated pairs of authentic scratched photographs and their manually restored ground-truths.
+                        </li>
+                        <li>
+                            <strong>OSPD (Old Scratched Photo Dataset):</strong> 238 highly complex scratch/scratch-free pairs for training contextual assistance mechanisms.<br>
+                            <a href="https://github.com/cwyyt/Contextual-assisted-Scratched-Photo-Restoration" target="_blank" class="link-badge">github.com/cwyyt/...</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Image Colorization Section -->
+        <section class="research-section">
+            <h2 class="section-title">Phase 2: Image Colorization</h2>
+            <div class="card-grid">
+                <!-- Architectures -->
+                <div class="card">
+                    <h3>Architectures</h3>
+                    <p>Translating single-channel grayscale into three-channel RGB requires predicting an infinite mathematical distribution of potential chrominance values.</p>
+                    
+                    <h4>Pix2Pix (Conditional GANs)</h4>
+                    <p>Utilizes a deep U-Net backbone generator and a PatchGAN discriminator that assesses realism at localized N×N patches to force high-frequency chromatic textures.</p>
+                    
+                    <h4>DeOldify</h4>
+                    <p>Solves spatial inconsistency and temporal flickering via a novel "NoGAN" training methodology. Pre-trains generator and critic independently, applying only a brief adversarial shock to inject vibrant color without accruing typical GAN artifacts.</p>
+
+                    <h4>DDColor (Dual Decoders)</h4>
+                    <p>Solves "color bleeding" by decoupling structural reconstruction from semantic color processing. Uses a Pixel Decoder for structure and a query-based Color Decoder, linking them via rigid cross-attention.</p>
+
+                    <h4>Palette (Latent Diffusion)</h4>
+                    <p>Adapts text-to-image latent diffusion into conditional translation. Reverses denoising based strictly on the grayscale condition, yielding photorealistic contextual colors utilizing deep semantic understanding.</p>
+                </div>
+
+                <!-- Datasets -->
+                <div class="card">
+                    <h3>Datasets</h3>
+                    <p>Colorization networks must ingest massive datasets of modern color imagery to learn mathematical input-output mappings.</p>
+                    
+                    <h4>Standard Broad-Domain Datasets</h4>
+                    <ul>
+                        <li>
+                            <strong>ImageNet:</strong> 14 million annotated images. Used heavily by DeOldify for its brief NoGAN adversarial phase.<br>
+                            <a href="https://www.image-net.org/" target="_blank" class="link-badge">image-net.org</a>
+                        </li>
+                        <li>
+                            <strong>COCO (Common Objects in Context):</strong> 330k "scene-centric" images with complex environments to resolve object-centric bias.<br>
+                            <a href="https://docs.ultralytics.com/datasets/detect/coco/" target="_blank" class="link-badge">docs.ultralytics.com/coco</a>
+                        </li>
+                    </ul>
+
+                    <h4>Domain-Specific Historical Datasets</h4>
+                    <ul>
+                        <li>
+                            <strong>Historical Color Image Dataset (HCID):</strong> 1,325 authentic color photographs (1930s-1970s). Captures exact chemical color profiles to prevent modern "HDR-style" anachronisms.<br>
+                            <a href="http://graphics.cs.cmu.edu/projects/historicalColor/" target="_blank" class="link-badge">graphics.cs.cmu.edu</a>
+                        </li>
+                        <li>
+                            <strong>ViCoW (Vietnam War Imagery):</strong> 1,896 high-res image pairs extracted from historical films, serving as a benchmark for severe temporal degradation and archival media adaptation.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metrics & Baselines Section -->
+        <section class="research-section">
+            <h2 class="section-title">Evaluation Metrics & Baselines</h2>
+            <div class="card-grid">
+                <!-- Metrics -->
+                <div class="card">
+                    <h3>Mathematical Evaluation Metrics</h3>
+                    <p>Evaluating generative AI models requires a departure from legacy mathematical assessments toward deep perceptual metrics.</p>
+                    
+                    <h4>PSNR & SSIM</h4>
+                    <p><strong>Peak Signal-to-Noise Ratio (PSNR)</strong> calculates raw spatial pixel errors using Mean Squared Error. <strong>Structural Similarity Index (SSIM)</strong> improves upon this by evaluating luminance, contrast, and structure.</p>
+                    <span class="formula">MSE = (1/mn) * Σ[I(i,j) - K(i,j)]²</span>
+                    <p><em>Limitation:</em> Heavily penalizes generative hallucination despite visual realism.</p>
+
+                    <h4>LPIPS (Learned Perceptual Image Patch Similarity)</h4>
+                    <p>The gold standard for generative models. Abandons raw pixels for deep-learning-based perceptual similarity using internal feature activations of pre-trained networks (VGGNet/AlexNet).</p>
+                    <span class="formula">d₀(x, x₀) = Σ ||wˡ ⊙ (yˡ - y₀ˡ)||₂²</span>
+
+                    <h4>FID (Fréchet Inception Distance)</h4>
+                    <p>A non-reference, distribution-based metric that computes the Wasserstein-2 distance between the statistical distribution of real photographs and generated images using Inception-v3 features.</p>
+                    <span class="formula">FID = ||μ_r - μ_g||₂² + Tr(Σ_r + Σ_g - 2√(Σ_r Σ_g))</span>
+                </div>
+
+                <!-- Baselines -->
+                <div class="card">
+                    <h3>State-of-the-Art Baselines</h3>
+                    <p>The following open-source GitHub repositories will serve as our project benchmarks.</p>
+                    
+                    <h4>Restoration Baselines</h4>
+                    <ul>
+                        <li>
+                            <strong>GFPGAN (TencentARC):</strong> Blind face restoration.<br>
+                            <a href="https://github.com/TencentARC/GFPGAN" target="_blank" class="link-badge">github.com/TencentARC/GFPGAN</a>
+                        </li>
+                        <li>
+                            <strong>Bringing Old Photos Back to Life (Microsoft):</strong> Latent space translation & scratch detection.<br>
+                            <a href="https://github.com/microsoft/Bringing-Old-Photos-Back-to-Life" target="_blank" class="link-badge">github.com/microsoft/...</a>
+                        </li>
+                        <li>
+                            <strong>DiffBIR (XPixelGroup):</strong> Latent diffusion for severe degradation.<br>
+                            <a href="https://github.com/XPixelGroup/DiffBIR" target="_blank" class="link-badge">github.com/XPixelGroup/DiffBIR</a>
+                        </li>
+                    </ul>
+
+                    <h4>Colorization Baselines</h4>
+                    <ul>
+                        <li>
+                            <strong>DeOldify (jantic):</strong> Foundational NoGAN baseline.<br>
+                            <a href="https://github.com/jantic/DeOldify" target="_blank" class="link-badge">github.com/jantic/DeOldify</a>
+                        </li>
+                        <li>
+                            <strong>DDColor (piddnad):</strong> Transformer-based dual-decoder methodology.<br>
+                            <a href="https://github.com/piddnad/DDColor" target="_blank" class="link-badge">github.com/piddnad/DDColor</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 American University of Beirut (AUB) - Neural Networks Project</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Research & Development Team: Hamza Atout, Nour Hammieh, Farah Abdallah</p>
+        </div>
+    </footer>
+
+</body>
+</html>
