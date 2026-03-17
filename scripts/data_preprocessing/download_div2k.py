@@ -2,10 +2,8 @@
 DIV2K Dataset Downloader for Revive AI.
 
 This module handles the programmatic downloading and extraction of the 
-DIV2K high-resolution validation dataset from ETH Zurich. It streams the 
-download to minimize RAM usage, extracts the images into the project's 
-raw data directory, and deletes the residual zip archive to conserve 
-disk space.
+DIV2K high-resolution validation dataset from ETH Zurich. It logs all 
+progress and deletes the residual zip archive to conserve disk space.
 
 Usage:
     Run this script directly from the terminal:
@@ -15,43 +13,42 @@ Usage:
 import os
 import urllib.request
 import zipfile
+import shutil
+import logging
+
+# Set up the logger
+os.makedirs("../../logs", exist_ok=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("../../logs/data_download.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("DIV2KDownloader")
 
 def download_div2k_scenes():
-    """
-    Downloads and extracts the DIV2K high-resolution validation images.
-
-    This function connects to the official ETH Zurich vision server, 
-    downloads the DIV2K_valid_HR.zip file in chunks, extracts the 
-    images to the local restoration_scenes directory, and cleans up 
-    the zip file afterward.
-
-    Returns:
-        None
-    """
+    """Downloads and extracts the DIV2K high-resolution validation images."""
     url = "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip"
     target_dir = "../../data/raw/restoration_scenes"
     zip_path = os.path.join(target_dir, "DIV2K_valid_HR.zip")
     
     os.makedirs(target_dir, exist_ok=True)
 
-    print("Downloading DIV2K High-Res Scenes (This is ~350MB)...")
+    logger.info("Starting download of DIV2K High-Res Scenes (~350MB)...")
     try:
-        # Download the file
         urllib.request.urlretrieve(url, zip_path)
-        print("Download complete. Extracting files...")
+        logger.info("Download complete. Extracting files...")
         
-        # Extract the contents
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            # The zip file contains a folder named 'DIV2K_valid_HR'
             zip_ref.extractall(target_dir)
             
-        print("Extraction complete.")
+        logger.info("Extraction complete.")
         
-        # Cleanup the heavy zip file
-        print("Cleaning up the .zip archive...")
+        logger.info("Cleaning up the .zip archive...")
         os.remove(zip_path)
         
-        # Optional: Move images out of the nested folder to the parent target_dir
         nested_folder = os.path.join(target_dir, "DIV2K_valid_HR")
         if os.path.exists(nested_folder):
             for img_name in os.listdir(nested_folder):
@@ -60,11 +57,10 @@ def download_div2k_scenes():
                 os.rename(shutil_src, shutil_dst)
             os.rmdir(nested_folder)
             
-        print(f"Success! DIV2K scenes are ready in {target_dir}")
+        logger.info(f"Success! DIV2K scenes are ready in {target_dir}")
 
     except Exception as e:
-        print(f"An error occurred during download or extraction: {e}")
+        logger.error(f"An error occurred during download or extraction: {e}")
 
 if __name__ == "__main__":
-    import shutil # Imported here for the nested folder cleanup
     download_div2k_scenes()

@@ -39,3 +39,6 @@ scripts/data_preprocessing/processed/
 .idea/
 .vscode/
 *.swp
+
+# Logs
+logs/
