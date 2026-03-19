@@ -1,0 +1,9 @@
+# Deep Learning (CPU mode - newest version)
+tensorflow
+
+# Computer Vision & Data Processing
+opencv-python>=4.8.0
+numpy>=1.24.3
+
+# Data Ingestion
+kagglehub>=0.2.0
