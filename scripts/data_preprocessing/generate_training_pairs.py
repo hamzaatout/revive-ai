@@ -96,9 +96,21 @@ def slice_and_save_patches(pristine_img, degraded_img, base_filename, out_in_dir
     if h < patch_size or w < patch_size:
         p_patch = cv2.resize(pristine_img, (patch_size, patch_size), interpolation=cv2.INTER_CUBIC)
         d_patch = cv2.resize(degraded_img, (patch_size, patch_size), interpolation=cv2.INTER_CUBIC)
-        
-        cv2.imwrite(os.path.join(out_in_dir, f"{base_filename}_p0.jpg"), d_patch)
-        cv2.imwrite(os.path.join(out_tar_dir, f"{base_filename}_p0.jpg"), p_patch)
+
+        input_path = os.path.join(out_in_dir, f"{base_filename}_p0.jpg")
+        target_path = os.path.join(out_tar_dir, f"{base_filename}_p0.jpg")
+        success_input = cv2.imwrite(input_path, d_patch)
+        success_target = cv2.imwrite(target_path, p_patch)
+        if not success_input or not success_target:
+            logger.error(
+                "Failed to write resized patch for '%s' (input_written=%s, target_written=%s, input_path='%s', target_path='%s')",
+                base_filename,
+                success_input,
+                success_target,
+                input_path,
+                target_path,
+            )
+            raise RuntimeError(f"Failed to write resized patch images for '{base_filename}'")
         return 1
 
     # Logic for DIV2K: Slice the massive image into a grid
@@ -106,9 +118,22 @@ def slice_and_save_patches(pristine_img, degraded_img, base_filename, out_in_dir
         for x in range(0, w - patch_size + 1, patch_size):
             p_patch = pristine_img[y:y+patch_size, x:x+patch_size]
             d_patch = degraded_img[y:y+patch_size, x:x+patch_size]
-            
-            cv2.imwrite(os.path.join(out_in_dir, f"{base_filename}_p{patch_count}.jpg"), d_patch)
-            cv2.imwrite(os.path.join(out_tar_dir, f"{base_filename}_p{patch_count}.jpg"), p_patch)
+
+            input_path = os.path.join(out_in_dir, f"{base_filename}_p{patch_count}.jpg")
+            target_path = os.path.join(out_tar_dir, f"{base_filename}_p{patch_count}.jpg")
+            success_input = cv2.imwrite(input_path, d_patch)
+            success_target = cv2.imwrite(target_path, p_patch)
+            if not success_input or not success_target:
+                logger.error(
+                    "Failed to write patch %d for '%s' (input_written=%s, target_written=%s, input_path='%s', target_path='%s')",
+                    patch_count,
+                    base_filename,
+                    success_input,
+                    success_target,
+                    input_path,
+                    target_path,
+                )
+                raise RuntimeError(f"Failed to write patch {patch_count} for '{base_filename}'")
             patch_count += 1
             
     return patch_count
