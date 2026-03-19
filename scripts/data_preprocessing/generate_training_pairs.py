@@ -18,14 +18,18 @@ import os
 import glob
 import random
 import logging
+from pathlib import Path
 
 # Set up the logger
-os.makedirs("../../logs", exist_ok=True)
+repo_root = Path(__file__).resolve().parents[2]
+logs_dir = repo_root / "logs"
+logs_dir.mkdir(parents=True, exist_ok=True)
+log_file = logs_dir / "data_preprocessing.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("../../logs/data_preprocessing.log"),
+        logging.FileHandler(str(log_file)),
         logging.StreamHandler()
     ]
 )
@@ -40,9 +44,9 @@ def add_physical_scratches(img):
     num_scratches = random.randint(3, 10)
     
     for _ in range(num_scratches):
-        # Random start and end coordinates for the scratch
-        x1, y1 = random.randint(0, w), random.randint(0, h)
-        x2, y2 = random.randint(0, w), random.randint(0, h)
+        # Random start and end coordinates for the scratch (stay within image bounds)
+        x1, y1 = random.randint(0, w - 1), random.randint(0, h - 1)
+        x2, y2 = random.randint(0, w - 1), random.randint(0, h - 1)
         
         # Randomly choose if the scratch is white (tear) or black (dirt)
         color = (255, 255, 255) if random.random() > 0.5 else (0, 0, 0)
@@ -92,9 +96,21 @@ def slice_and_save_patches(pristine_img, degraded_img, base_filename, out_in_dir
     if h < patch_size or w < patch_size:
         p_patch = cv2.resize(pristine_img, (patch_size, patch_size), interpolation=cv2.INTER_CUBIC)
         d_patch = cv2.resize(degraded_img, (patch_size, patch_size), interpolation=cv2.INTER_CUBIC)
-        
-        cv2.imwrite(os.path.join(out_in_dir, f"{base_filename}_p0.jpg"), d_patch)
-        cv2.imwrite(os.path.join(out_tar_dir, f"{base_filename}_p0.jpg"), p_patch)
+
+        input_path = os.path.join(out_in_dir, f"{base_filename}_p0.jpg")
+        target_path = os.path.join(out_tar_dir, f"{base_filename}_p0.jpg")
+        success_input = cv2.imwrite(input_path, d_patch)
+        success_target = cv2.imwrite(target_path, p_patch)
+        if not success_input or not success_target:
+            logger.error(
+                "Failed to write resized patch for '%s' (input_written=%s, target_written=%s, input_path='%s', target_path='%s')",
+                base_filename,
+                success_input,
+                success_target,
+                input_path,
+                target_path,
+            )
+            raise RuntimeError(f"Failed to write resized patch images for '{base_filename}'")
         return 1
 
     # Logic for DIV2K: Slice the massive image into a grid
@@ -102,9 +118,22 @@ def slice_and_save_patches(pristine_img, degraded_img, base_filename, out_in_dir
         for x in range(0, w - patch_size + 1, patch_size):
             p_patch = pristine_img[y:y+patch_size, x:x+patch_size]
             d_patch = degraded_img[y:y+patch_size, x:x+patch_size]
-            
-            cv2.imwrite(os.path.join(out_in_dir, f"{base_filename}_p{patch_count}.jpg"), d_patch)
-            cv2.imwrite(os.path.join(out_tar_dir, f"{base_filename}_p{patch_count}.jpg"), p_patch)
+
+            input_path = os.path.join(out_in_dir, f"{base_filename}_p{patch_count}.jpg")
+            target_path = os.path.join(out_tar_dir, f"{base_filename}_p{patch_count}.jpg")
+            success_input = cv2.imwrite(input_path, d_patch)
+            success_target = cv2.imwrite(target_path, p_patch)
+            if not success_input or not success_target:
+                logger.error(
+                    "Failed to write patch %d for '%s' (input_written=%s, target_written=%s, input_path='%s', target_path='%s')",
+                    patch_count,
+                    base_filename,
+                    success_input,
+                    success_target,
+                    input_path,
+                    target_path,
+                )
+                raise RuntimeError(f"Failed to write patch {patch_count} for '{base_filename}'")
             patch_count += 1
             
     return patch_count

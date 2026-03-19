@@ -28,9 +28,31 @@ logging.basicConfig(
 )
 logger = logging.getLogger("DIV2KDownloader")
 
+def _is_within_directory(directory: str, target: str) -> bool:
+    """
+    Ensure that the target path is within the given directory.
+
+    This protects against path traversal attempts when extracting archives.
+    """
+    abs_directory = os.path.abspath(directory)
+    abs_target = os.path.abspath(target)
+    return os.path.commonpath([abs_directory]) == os.path.commonpath([abs_directory, abs_target])
+
+
+def safe_extract(zip_ref: zipfile.ZipFile, path: str) -> None:
+    """
+    Safely extract a ZipFile into the given directory, preventing Zip Slip.
+    """
+    for member in zip_ref.infolist():
+        member_path = os.path.join(path, member.filename)
+        if not _is_within_directory(path, member_path):
+            raise Exception(f"Attempted Path Traversal in Zip File: {member.filename}")
+    zip_ref.extractall(path)
+
+
 def download_div2k_scenes():
     """Downloads and extracts the DIV2K high-resolution validation images."""
-    url = "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip"
+    url = "https://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip"
     target_dir = "../../data/raw/restoration_scenes"
     zip_path = os.path.join(target_dir, "DIV2K_valid_HR.zip")
     
@@ -42,7 +64,7 @@ def download_div2k_scenes():
         logger.info("Download complete. Extracting files...")
         
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(target_dir)
+            safe_extract(zip_ref, target_dir)
             
         logger.info("Extraction complete.")
         
@@ -54,7 +76,10 @@ def download_div2k_scenes():
             for img_name in os.listdir(nested_folder):
                 shutil_src = os.path.join(nested_folder, img_name)
                 shutil_dst = os.path.join(target_dir, img_name)
-                os.rename(shutil_src, shutil_dst)
+                if os.path.exists(shutil_dst):
+                    logger.info(f"Overwriting existing file during flattening: {shutil_dst}")
+                    os.remove(shutil_dst)
+                shutil.move(shutil_src, shutil_dst)
             os.rmdir(nested_folder)
             
         logger.info(f"Success! DIV2K scenes are ready in {target_dir}")
