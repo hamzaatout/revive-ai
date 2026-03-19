@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revive AI | Historical Restoration</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Drag and Drop Zone */
+        #upload-container {
+            margin-top: 3rem;
+            width: 500px;
+            height: 300px;
+            border: 2px dashed #334155;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        #upload-container:hover, #upload-container.dragover {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        #file-input { display: none; }
+
+        /* Loading State */
+        #loading-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 4rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Before/After Slider */
+        #result-container {
+            display: none;
+            margin-top: 3rem;
+            position: relative;
+            width: 512px;
+            height: 512px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .img-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #img-original {
+            z-index: 2;
+            clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+        }
+
+        #img-restored { z-index: 1; }
+
+        .slider-handle {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background: white;
+            z-index: 3;
+            cursor: ew-resize;
+            transform: translateX(-50%);
+        }
+
+        .slider-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        .slider-button::after, .slider-button::before {
+            content: '';
+            border: solid #0f172a;
+            border-width: 0 2px 2px 0;
+            display: inline-block;
+            padding: 3px;
+        }
+        
+        .slider-button::before { transform: rotate(135deg); margin-right: 2px; }
+        .slider-button::after { transform: rotate(-45deg); margin-left: 2px; }
+
+        button.reset-btn {
+            margin-top: 2rem;
+            padding: 10px 24px;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        button.reset-btn:hover { opacity: 0.8; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Revive AI</h1>
+        <p class="subtitle">Multi-Model Restoration Engine (U-Net + GFPGAN)</p>
+    </header>
+
+    <div id="upload-container" onclick="document.getElementById('file-input').click()">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <h3 style="margin: 1rem 0 0.5rem 0;">Drag & Drop a historical photo</h3>
+        <p style="color: #64748b; margin: 0; font-size: 0.9rem;">or click to browse your files</p>
+        <input type="file" id="file-input" accept="image/jpeg, image/png">
+    </div>
+
+    <div id="loading-state">
+        <div class="spinner"></div>
+        <p style="margin-top: 1rem; color: var(--accent-color);">Routing through AI Microservices...</p>
+    </div>
+
+    <div id="result-container">
+        <img id="img-restored" class="img-layer" src="" alt="Restored">
+        <img id="img-original" class="img-layer" src="" alt="Original">
+        <div class="slider-handle" id="slider-handle">
+            <div class="slider-button"></div>
+        </div>
+    </div>
+    <div id="reset-zone" style="display: none;">
+        <button class="reset-btn" onclick="location.reload()">Restore Another Photo</button>
+    </div>
+
+    <script>
+        const uploadContainer = document.getElementById('upload-container');
+        const fileInput = document.getElementById('file-input');
+        const loadingState = document.getElementById('loading-state');
+        const resultContainer = document.getElementById('result-container');
+        const resetZone = document.getElementById('reset-zone');
+        
+        const imgOriginal = document.getElementById('img-original');
+        const imgRestored = document.getElementById('img-restored');
+        const sliderHandle = document.getElementById('slider-handle');
+
+        uploadContainer.addEventListener('dragover', (e) => { e.preventDefault(); uploadContainer.classList.add('dragover'); });
+        uploadContainer.addEventListener('dragleave', () => uploadContainer.classList.remove('dragover'));
+        uploadContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadContainer.classList.remove('dragover');
+            if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        async function handleFile(file) {
+            uploadContainer.style.display = 'none';
+            loadingState.style.display = 'flex';
+            imgOriginal.src = URL.createObjectURL(file);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // Pointing to the new API Gateway Orchestrator!
+                const response = await fetch('http://127.0.0.1:8000/process_image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("API Processing Failed");
+
+                const blob = await response.blob();
+                imgRestored.src = URL.createObjectURL(blob);
+
+                loadingState.style.display = 'none';
+                resultContainer.style.display = 'block';
+                resetZone.style.display = 'block';
+
+            } catch (error) {
+                alert("Error connecting to Revive AI Gateway. Are all 3 servers running?");
+                console.error(error);
+                location.reload();
+            }
+        }
+
+        let isSliding = false;
+        function moveSlider(e) {
+            if (!isSliding) return;
+            const rect = resultContainer.getBoundingClientRect();
+            let x = (e.clientX || e.touches[0].clientX) - rect.left;
+            x = Math.max(0, Math.min(x, rect.width));
+            const percent = (x / rect.width) * 100;
+            sliderHandle.style.left = `${percent}%`;
+            imgOriginal.style.clipPath = `polygon(0 0, ${percent}% 0, ${percent}% 100%, 0 100%)`;
+        }
+
+        sliderHandle.addEventListener('mousedown', () => isSliding = true);
+        document.addEventListener('mouseup', () => isSliding = false);
+        document.addEventListener('mousemove', moveSlider);
+        sliderHandle.addEventListener('touchstart', () => isSliding = true);
+        document.addEventListener('touchend', () => isSliding = false);
+        document.addEventListener('touchmove', moveSlider);
+    </script>
+</body>
+</html>
