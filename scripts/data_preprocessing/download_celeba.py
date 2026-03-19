@@ -51,6 +51,10 @@ def download_celeba_subset(num_images=5000):
     if not os.path.exists(source_dir):
         source_dir = os.path.join(cache_path, "img_align_celeba")
 
+    if not os.path.isdir(source_dir):
+        logger.error(f"Expected image folder not found at: {source_dir}")
+        return
+
     images = [f for f in os.listdir(source_dir) if f.endswith('.jpg')]
     logger.info(f"Found dataset. Extracting {num_images} images for training...")
     
