@@ -44,9 +44,9 @@ def add_physical_scratches(img):
     num_scratches = random.randint(3, 10)
     
     for _ in range(num_scratches):
-        # Random start and end coordinates for the scratch
-        x1, y1 = random.randint(0, w), random.randint(0, h)
-        x2, y2 = random.randint(0, w), random.randint(0, h)
+        # Random start and end coordinates for the scratch (stay within image bounds)
+        x1, y1 = random.randint(0, w - 1), random.randint(0, h - 1)
+        x2, y2 = random.randint(0, w - 1), random.randint(0, h - 1)
         
         # Randomly choose if the scratch is white (tear) or black (dirt)
         color = (255, 255, 255) if random.random() > 0.5 else (0, 0, 0)
