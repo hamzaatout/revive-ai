@@ -18,14 +18,18 @@ import os
 import glob
 import random
 import logging
+from pathlib import Path
 
 # Set up the logger
-os.makedirs("../../logs", exist_ok=True)
+repo_root = Path(__file__).resolve().parents[2]
+logs_dir = repo_root / "logs"
+logs_dir.mkdir(parents=True, exist_ok=True)
+log_file = logs_dir / "data_preprocessing.log"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("../../logs/data_preprocessing.log"),
+        logging.FileHandler(str(log_file)),
         logging.StreamHandler()
     ]
 )
