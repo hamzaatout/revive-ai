@@ -76,7 +76,10 @@ def download_div2k_scenes():
             for img_name in os.listdir(nested_folder):
                 shutil_src = os.path.join(nested_folder, img_name)
                 shutil_dst = os.path.join(target_dir, img_name)
-                os.rename(shutil_src, shutil_dst)
+                if os.path.exists(shutil_dst):
+                    logger.info(f"Overwriting existing file during flattening: {shutil_dst}")
+                    os.remove(shutil_dst)
+                shutil.move(shutil_src, shutil_dst)
             os.rmdir(nested_folder)
             
         logger.info(f"Success! DIV2K scenes are ready in {target_dir}")
