@@ -49,6 +49,17 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+
+# Add this block to allow your HTML file to communicate with the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, restrict this to your Vercel domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 def process_image_tensor(image_bytes: bytes):
     """Converts uploaded bytes into the 256x256 normalized tensor the U-Net expects."""
     # Convert raw bytes to an OpenCV image array
