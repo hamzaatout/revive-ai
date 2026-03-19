@@ -56,14 +56,23 @@ def download_celeba_subset(num_images=5000):
         return
 
     images = [f for f in os.listdir(source_dir) if f.endswith('.jpg')]
-    logger.info(f"Found dataset. Extracting {num_images} images for training...")
-    
-    for i, img_name in enumerate(images[:num_images]):
+    num_to_copy = min(num_images, len(images))
+    logger.info(
+        f"Found dataset with {len(images)} images. Attempting to extract {num_to_copy} "
+        f"images for training (requested {num_images})."
+    )
+
+    copied_count = 0
+    for i, img_name in enumerate(images[:num_to_copy]):
         src_path = os.path.join(source_dir, img_name)
         dst_path = os.path.join(target_dir, img_name)
-        shutil.copy(src_path, dst_path)
+        try:
+            shutil.copy(src_path, dst_path)
+            copied_count += 1
+        except Exception as e:
+            logger.warning(f"Failed to copy image {img_name}: {e}")
 
-    logger.info(f"Successfully copied {num_images} images to {target_dir}")
+    logger.info(f"Successfully copied {copied_count} images to {target_dir}")
 
     logger.info("Cleaning up the 200,000+ cached images to save disk space...")
     try:
