@@ -30,7 +30,7 @@ logger = logging.getLogger("DIV2KDownloader")
 
 def download_div2k_scenes():
     """Downloads and extracts the DIV2K high-resolution validation images."""
-    url = "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip"
+    url = "https://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip"
     target_dir = "../../data/raw/restoration_scenes"
     zip_path = os.path.join(target_dir, "DIV2K_valid_HR.zip")
     
