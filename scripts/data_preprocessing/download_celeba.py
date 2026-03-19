@@ -16,13 +16,18 @@ import os
 import shutil
 import logging
 
+# Resolve paths relative to this script so they are stable regardless of cwd
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, os.pardir, os.pardir))
+LOG_DIR = os.path.join(REPO_ROOT, "logs")
+
 # Set up the logger
-os.makedirs("../../logs", exist_ok=True)
+os.makedirs(LOG_DIR, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler("../../logs/data_download.log"),
+        logging.FileHandler(os.path.join(LOG_DIR, "data_download.log")),
         logging.StreamHandler()
     ]
 )
@@ -39,7 +44,7 @@ def download_celeba_subset(num_images=5000):
         logger.error(f"Failed to download from Kaggle. Error: {e}")
         return
 
-    target_dir = "../../data/raw/restoration_faces"
+    target_dir = os.path.join(REPO_ROOT, "data", "raw", "restoration_faces")
     os.makedirs(target_dir, exist_ok=True)
 
     source_dir = os.path.join(cache_path, "img_align_celeba", "img_align_celeba")
